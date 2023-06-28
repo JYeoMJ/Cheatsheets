@@ -1,0 +1,418 @@
+\documentclass[a4paper]{article}
+\usepackage[
+    a4paper, left=1cm, right=1cm, top=1cm, bottom=1cm, landscape
+]{geometry}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}             % \mathbb
+\usepackage{amssymb}              % \nmid
+\usepackage{booktabs}             % for toprule
+\usepackage[makeroom]{cancel}     % \cancel in math
+\usepackage{environ}              % scaletikzpicturetowidth env
+\usepackage{enumitem}             % [leftmargin=*]
+\usepackage{fancyvrb}             % center-able BVerbatim env
+\usepackage{IEEEtrantools}
+\usepackage{multicol}
+\usepackage[graphicx]{realboxes}  % Rotatebox for the table
+\usepackage{tabularx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+\usepackage{accents}
+
+% heading macros
+\newcommand{\heading}[1]{{\small\underline{\textbf{#1}}}}
+\newcommand{\subheading}[1]{{\scriptsize\textbf{#1}}}
+
+% math macros
+\newcommand{\expectation}[1]{\operatorname{E}[#1]}
+\newcommand{\ddx}{\frac{d}{dx}}
+\DeclareMathOperator{\Rank}{Rank}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\MSE}{MSE}
+\DeclareMathOperator{\eff}{eff}
+\DeclareMathOperator{\Cov}{Cov}
+
+
+% make itemize use dash (-) instead of bullet
+%\renewcommand\labelitemi{-}
+
+% scale tikz to column width
+\makeatletter
+\newsavebox{\measure@tikzpicture}
+\NewEnviron{scaletikzpicturetowidth}[1]{%
+  \def\tikz@width{#1}%
+  \def\tikzscale{1}\begin{lrbox}{\measure@tikzpicture}%
+  \BODY
+  \end{lrbox}%
+  \pgfmathparse{#1/\wd\measure@tikzpicture}%
+  \edef\tikzscale{\pgfmathresult}%
+  \BODY
+}
+\makeatother
+
+\begin{document}
+
+\scriptsize                         % Small fonts
+\pagenumbering{gobble}              % No page numbers
+\setlength\parindent{0pt}           % No indents at start of paragraphs
+\setlength{\abovedisplayskip}{3pt}  % Less spacing before equations
+\setlength{\belowdisplayskip}{3pt}  % less spacing after equations
+
+% TITLE %A
+\begin{center}
+  {\large ST5210 Multivariate Data Analysis Cheatsheet}\\{Yeo Ming Jie, Jonathan}
+\end{center}
+
+% BODY %
+\begin{multicols*}{4}
+
+% \subheading{insert title}
+% \smallskip
+
+\subheading{Ch 3: Multivariate Distributions}
+
+Let $\underline{X} \sim N_p(\underline{\mu},\Sigma)$. Then $$\underline{Y}=A \underline{X}+\underline{b} \sim N_q\left(A \underline{\mu}+\underline{b}, A \Sigma A^T\right)$$
+Any subset ($q$-component) of $\underline{X}$ is $q$-variate normal.
+
+\textbf{Theorem:} Let $\underline{X}=\left(\frac{X_1}{X_2}\right) \sim N_p(\underline{\mu}, \Sigma)$ and
+$$
+\Sigma=\left(\begin{array}{ll}
+\Sigma_{11} & \Sigma_{12} \\
+\Sigma_{21} & \Sigma_{22}
+\end{array}\right)
+$$
+Let $\underline{X}_{2.1}=\underline{X_2}-\Sigma_{21} \Sigma_{11}^{-1} \underline{X}_1$.
+Then
+$$
+\underline{X}_1 \sim N_r\left(\underline{\mu}_1, \Sigma_{11}\right) \text { \textbf{and }} \underline{X}_{2.1} \sim N_{p-r}\left(\underline{\mu}_{2.1}, \Sigma_{22.1}\right)
+$$
+where\\
+$\underline{\mu}_{2.1}=\underline{\mu}_2-\Sigma_{21} \Sigma_{11}^{-1} \underline{\mu}_1$ \textbf{and} $\Sigma_{22.1}=\Sigma_{22}-\Sigma_{21} \Sigma_{11}^{-1} \Sigma_{12}$. 
+\smallskip
+
+\underline{\textbf{Conditional Distribution of $\underline{x}_2$ given $\underline{x}_1 = \underline{x}$:}} \\
+$$\left(\underline{X}_2 | \underline{X}_1=\underline{x}_1\right) \sim N_{p-r}\left(\underline{\mu}_2+\Sigma_{21} \Sigma_{11}^{-1}\left(\underline{x}_1-\underline{\mu}_1\right), \Sigma_{22.1}\right)$$
+\textbf{Theorem:} \\
+If $\underline{X}_1 \sim N_r\left(\underline{\mu}_1, \Sigma_{11}\right)$ and $\left(\underline{X}_2 \mid \underline{X}_1=\underline{x}_1\right) \sim N_{p-r}\left(A \underline{x}_1+\underline{b}, \Omega\right)$, where $\Omega$ does not depend on $\underline{x}_1$, then
+$$
+\underline{X}=\left(\begin{array}{l}
+\underline{X_1} \\
+\underline{X}_2
+\end{array}\right) \sim N_p(\underline{\mu}, \Sigma)
+$$
+where 
+$$
+\underline{\mu}=\left(\begin{array}{c}\underline{\mu}_1 \\ A \underline{\mu_1}+\underline{b}\end{array}\right) 
+\; \text{,} \;
+\Sigma=\left(\begin{array}{cc}\Sigma_{11} & \Sigma_{11} A^T \\ A \Sigma_{11} & \Omega+A \Sigma_{11} A^T\end{array}\right)
+$$
+\smallskip
+\hline
+\smallskip
+\textbf{Central Limit Theorem:} \\
+If $\underline{X}_1, \underline{X}_2, \cdots, \underline{X}_n$ are independent and identically distributed with mean $\underline{\mu}$ and variance matrix $\Sigma$, and $\underline{X}=\frac{1}{n} \sum_{i=1}^n \underline{X}_i$, then
+$$
+\sqrt{n}(\underline{\bar{X}}-\underline{\mu}) \stackrel{\mathcal{L}}{\rightarrow} N_p(\underline{0}, \Sigma) \quad \text { for } n \rightarrow \infty
+$$
+Note: No assumption of normality required. \\
+\textbf{Transformation of Statistics:} \\
+\smallskip
+If $\sqrt{n}(\underline{W}-\underline{\mu}) \stackrel{\mathcal{L}}{\rightarrow} N_p(\underline{0}, \Sigma)$ and
+if $$\underline{g}(\underline{W})=\left(g_1(\underline{W}), \cdots, g_q(\underline{W})\right)^T: \mathbb{R}^p \rightarrow \mathbb{R}^q$$ are real valued functions differentiable at $\underline{\mu} \in \mathbb{R}^p$, then
+$$
+\sqrt{n}(\underline{g}(\underline{W})-\underline{g}(\underline{\mu})) \stackrel{\mathcal{L}}{\rightarrow} N_q\left(\underline{0}, D^T \Sigma D\right) \quad \text { for } n \rightarrow \infty
+$$
+where $D=\left(\left.\left(\frac{\partial g_j}{\partial w_i}\right)(\underline{W})\right|_{\underline{W}=\underline{\mu}}\right)$ is a $(p \times q)$ matrix of all partial derivatives.
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{Ch 4: Sampling Distributions}
+
+Let $\underline{X}_1, \underline{X}_2, \cdots, \underline{X}_n$ be a random sample taken from a multivariate normal distribution $N_p(\underline{\mu}, \Sigma)$.
+\begin{enumerate}
+    \item 
+    \begin{enumerate}
+        \item $\underline{\bar{X}} \sim N_p\left(\underline{\mu}, \frac{1}{n} \Sigma\right)$
+        \item $(n-1) S \sim W(n-1, \Sigma)$
+        \item $\underline{X}$ and $S$ are independent
+    \end{enumerate}
+    \item $n(\underline{\bar{X}}-\underline{\mu})^T \Sigma^{-1}(\underline{\bar{X}}-\underline{\mu}) \sim \chi^2(p)$
+    \item $n(\underline{\bar{X}}-\underline{\mu})^T S^{-1}(\underline{\bar{X}}-\underline{\mu}) \sim T^2(p, n-1)$ \\
+$$
+\text{where} \;\;  T^2(p, n-1)=\frac{(n-1) p}{n-p} F(p, n-p)
+$$
+\end{enumerate}
+\hline
+\smallskip
+\subheading{Ch 5: Hypothesis Testing}
+
+Want to test $\mathrm{H}_0: \underline{\mu}=\underline{\mu}_0$ against $\mathrm{H}_1: \underline{\mu} \neq \underline{\mu}_0$
+
+\textbf{\underline{Test Problem 1 ($\Sigma$ known):}}
+$$-2 \log \lambda=n\left(\underline{\bar{X}}-\underline{\mu}_0\right)^T \Sigma^{-1}\left(\underline{\bar{X}}-\underline{\mu}_0\right) \sim \chi^2(p)$$
+Reject for $$-2 \log \lambda > \chi_{0.95}^2(p)$$
+
+\textbf{\underline{Test Problem 2 ($\Sigma$ unknown):}} Rejection region:
+$$
+\left(\underline{\bar{X}}-\underline{\mu}_0\right)^T S^{-1}\left(\underline{\bar{X}}-\underline{\mu}_0\right)>\frac{(n-1) p}{n(n-p)} F_{1-\alpha}(p, n-p)
+$$
+\textbf{Confidence region for $\underline{\mu}$:}
+$$
+\begin{aligned}
+\left\{\underline{\mu} : (\underline{\bar{x}}-\underline{\mu})^T S^{-1}(\underline{\bar{x}}-\underline{\mu}) \leq \frac{(n-1) p}{n(n-p)} F_{1-\alpha}(p, n-p)\right\}
+\end{aligned}
+$$
+\textbf{Simultaneous Confidence Intervals for $\underline{a}^T \underline{\mu}$:}
+$$
+\left|\frac{\sqrt{n}\left(\underline{a}^T \underline{\bar{X}}-\underline{a}^T \underline{\mu}\right)}{\sqrt{\underline{a}^T S \underline{a}}}\right| \leq t_{1-\alpha / 2}(n-1)
+$$
+or equivalently
+$$
+\underline{a}^T \underline{\bar{X}}-\sqrt{K_\alpha \underline{a}^T S \underline{a}} \leq \underline{a}^T \underline{\mu} \leq \underline{a}^T \underline{\bar{X}}+\sqrt{K_\alpha \underline{a}^T S \underline{a}}
+$$
+where $K_\alpha=\frac{(n-1) p}{n(n-p)} F_{1-\alpha}(p, n-p)$.
+\smallskip
+\hline
+\smallskip
+\subheading{Ch 6: Two Group Analysis}
+
+\textbf{\underline{Paired Samples (Sample size $n$ small):}} \\
+\textbf{Test Statistic:}
+$$
+T^2=n \bar{D}^T \boldsymbol{S}_d^{-1} \underline{\bar{D}}
+$$
+Reject $\mathrm{H}_0$ if
+$$
+T^2>\frac{p(n-1)}{n-p} F_\alpha(p, n-p)
+$$
+$\mathbf{100(1-\alpha) \%}$\textbf{ Confidence Region} for $\underline{\delta}=\underline{\mu}_1-\underline{\mu}_2$ is
+$$
+\left\{\underline{\delta}: n(\underline{\bar{D}}-\underline{\delta})^T S_d^{-1}(\underline{\bar{D}}-\underline{\delta}) \leq \frac{p(n-1)}{n-p} F_\alpha(p, n-p)\right\}
+$$
+$\mathbf{100(1-\alpha) \%}$ \textbf{Bonferroni Simult. CIs} for $\delta_j$ 's are:
+$$
+\bar{D}_j \pm t_{\alpha^* / 2}(n-1) \sqrt{\frac{S_{j j}}{n}}
+$$
+where $\alpha^*=\alpha / p$ and
+$S_{j j}$ is $j$-th diagonal entry of $\boldsymbol{S}_d$.
+\smallskip \\
+\textbf{\underline{Paired Samples (Large sample size):}}
+$$
+T^2=n \bar{D}^T \boldsymbol{S}_d^{-1} \underline{\bar{D}} \sim \chi^2(p)
+\quad \text{approximately}$$
+Reject $\mathrm{H}_0$ if $T^2>\chi_\alpha^2(p)$.
+\smallskip
+
+$\mathbf{100(1-\alpha) \%}$ \textbf{Confidence Region} for $\underline{\delta}=\underline{\mu}_1-\underline{\mu}_2$:
+$$
+C R=\left\{\underline{\delta}: n(D-\underline{\delta})^T S_d^{-1}(\underline{\bar{D}}-\underline{\delta}) \leq \chi_\alpha^2(p)\right\}
+$$
+$\mathbf{100(1-\alpha) \%}$ \textbf{Bonferroni Simult. CIs} for $\delta_j$ 's are:
+$$
+\bar{D}_j \pm z_{\alpha^* / 2} \sqrt{\frac{S_{j j}}{n}}
+$$
+where $\alpha^*=\alpha / p$ and $S_{j j}$ is the $j^{\text {th }}$ diag entry of $\boldsymbol{S}_d$.
+
+\textbf{\underline{2 Indep. Samples (When $n_1$ or $n_2$ small):}}
+
+Assume $\Sigma_1 = \Sigma_2$. Define
+
+$$
+S_{pool} = \frac{(n_1-1)S_1 + (n_2-1)S_2}{n_1+n_2-2}
+$$
+Then
+$$
+T^2&=\left(\underline{\bar{x}}_1-\underline{\bar{x}}_2\right)^T\left[\left(\frac{1}{n_1}+\frac{1}{n_2}\right) S_{\text {pool }}\right]^{-1}\left(\underline{\bar{x}}_1-\underline{\bar{x}}_2\right)
+$$
+Reject $\mathrm{H}_0$ if
+$$
+T^2>\frac{\left(n_1+n_2-2\right) p}{n_1+n_2-1-p} F_\alpha\left(p, n_1+n_2-1-p\right) = \mathbf{k}
+$$
+\textbf{$\mathbf{100(1-\alpha) \%}$ Confidence Region} for $\underline{\delta}=\underline{\mu}_1-\underline{\mu}_2$ is
+$$
+\begin{aligned}
+\left\{\underline{\delta}:\left(\underline{\bar{X}_1}-\underline{\bar{X}_2}-\underline{\delta}\right)^T\left[\left(\frac{1}{n_1}+\frac{1}{n_2}\right) \mathbf{S}_{\text {pool }}\right]^{-1}
+\\\left(\underline{\bar{X}_1}-\underline{\bar{X}_2}-\underline{\delta}\right)\right \leq \mathbf{k}\}
+\end{aligned}
+$$
+$\mathbf{100(1-\alpha) \%}$ \textbf{Bonferroni Simult. CIs} for $\delta_j$'s are:
+$$
+\left(\underline{\bar{X}_1}-\underline{\bar{X}}_2\right)_j \pm t_{\alpha^* / 2}\left(n_1+n_2-2\right) \sqrt{\left(\frac{1}{n_1}+\frac{1}{n_2}\right) S_{j j}}
+$$
+where $S_{j j}=j$-th diagonal of $S_{\text {pool }}$ and $\alpha^*=\alpha / p$.
+\textbf{\underline{2 Indep. Samples (Large sample size):}}
+$$
+T^2 = \left(\underline{X}_1-\underline{X}_2\right)^T\left[\left(\frac{S_1}{n_1}+\frac{S_2}{n_2}\right)\right]^{-1}\left(\underline{X}_1-\underline{X}_2\right) \sim \chi^2(p)
+$$
+Reject $\mathrm{H}_0$ if the observed $T^2>\chi_\alpha^2(p)$. 
+
+$\mathbf{100(1-\alpha) \%}$ \textbf{Bonferroni Simult. CIs} for $\delta_j$'s:
+$$
+\left(\bar{X}_1-\underline{X}_2\right)_j \pm z_{\alpha^* / 2} \sqrt{\frac{S_{j j}^1}{n_1}+\frac{S_{j j}^2}{n_2}}
+$$
+where $S_{j j}^g=j$-th diagonal of $\boldsymbol{S}_g$ and $\alpha^*=\alpha / p$
+\smallskip
+\hline
+\smallskip
+\subheading{MANOVA}
+
+Have $\mathbf{S S C P}_{\text {tot }}=\mathbf{S S C P}_{\text {trt }}+\mathbf{S S C P}_{\text {res }}$ where
+$$
+\begin{aligned}
+\boldsymbol{S S C P _ { \text { tot } }}=\sum_{g=1}^a n_g\left(\underline{\bar{X}}_{g .}-\underline{\bar{X}}_{.}\right)\left(\underline{\bar{X}}_{g .}-\underline{\bar{X}}_{. .}\right)^T \\
++\sum_{g=1}^a \sum_{i=1}^{n_g}\left(\underline{X}_{g i}-\underline{\bar{X}}_g\right)\left(\underline{X}_{g i}-\underline{\bar{X}}_g .\right)^T
+\end{aligned}
+$$
+and 
+$$\boldsymbol{S S \boldsymbol { C } \boldsymbol { P } _ { \text { res } }}=\left(n_1-1\right) \boldsymbol{S}_1+\cdots+\left(n_a-1\right) \boldsymbol{S}_a$$ 
+where
+$$
+\boldsymbol{S}_g=\sum_{i=1}^{n_g}\left(\underline{X}_{g i}-\underline{\bar{X}}_g\right)\left(\underline{X}_{g i}-\underline{\bar{X}}_g\right)^T, \quad g=1, \cdots, a
+$$
+Test statistic
+$$
+\Lambda=\frac{\left|\boldsymbol{S S C P}_{\text {res }}\right|}{\left|\boldsymbol{S S C P}_{\text {trt }}+\boldsymbol{S S C P}_{\text {res }}\right|}
+$$
+\smallskip
+\hline
+\smallskip
+\subheading{Ch 7: Principal Component Analysis}
+
+Dimensionality Reduction. Define the $j$-th PC by
+$$
+Y_j = \undertilde{u}_j^T\undertilde{X} 
+$$
+where $\undertilde{u}_j =$ eigenvector corresponding to $\lambda_j$. Note that $Var(Y_j) = \lambda_j$ and $Cov(Y_j,Y_t)=0 \;\; (j \neq t)$, i.e. PCs are uncorrelated. \\
+\smallskip 
+\textbf{Note:} Proportion of Total Variance Explained $$PVE=\frac{Var(Y_j)}{tr(S)}=\frac{\lambda_j}{\sum_t \lambda_t}$$
+PCA results dependent on scaling of variables; higher loading placed on variables with high variability. Preferred to work with standardized variables:
+$$
+Z_i = \frac{X_i - \Bar{X}}{\sqrt{\sigma_{ii}}} \quad \text{and} \quad R = V^{-1/2}\Sigma V^{-1/2} 
+$$
+where $V^{-1/2} = diag(\sigma_{11}^{-1/2},\dots,\sigma_{pp}^{-1/2})$.
+\smallskip
+\hline
+\smallskip
+\subheading{Ch 8: Factor Analysis}
+
+Assume $E(\underline{F})=\underline{0}$, $\operatorname{Var}(\underline{F})=I_m$. (i.e. Factors are uncorrelated with mean $0$ and variance $1$. Let $E(\underline{U})=\underline{0}$ where
+$\operatorname{Var}(\underline{U})=\Psi=\operatorname{diag}\left(\psi_1, \cdots, \psi_p\right)$ and 
+$\operatorname{Cov}(\underline{F}, \underline{U})=0_{m \times p}$.
+
+\textbf{Factor Analysis Model}:
+
+$$
+\begin{aligned}
+&\underline{X}-\underline{\mu}=\Lambda \underline{F}+\underline{U} \\
+&\underline{\mu}=\text { mean vector } \\
+&\Lambda=(p \times m) \text { loadings } \\
+&\underline{F}=(m \times 1) \text { common factors } \\
+&\underline{U}=(p \times 1) \text { specific factors } \\
+\end{aligned}
+$$
+where $\underline{F}=\left(F_1, \cdots, F_m\right)^T, \underline{U}=\left(\epsilon_1, \cdots, \epsilon_p\right)^T$, and $(j, k)$-th entry of $\Lambda$ is $\lambda_{j, k}$. \\ Taking $Var(X)=\Sigma$, then
+$$
+\Sigma = \Lambda \Lambda^T + \Psi
+$$
+\textbf{Theorem:}
+$$
+\sigma_{j j}=\sum_{k=1}^m \lambda_{j k}^2+\psi_j=h_j^2+\psi_j
+$$
+where $h_j^2=\sum_{k=1}^m \lambda_{j k}^2$ is called the $j$-th communality,
+$\psi_j$ is called the specific variance or uniqueness.
+\smallskip
+
+\textbf{PVE:}  The $k$-th factor explains $d_k / \sum_{j=1}^p \sigma_{j j}$ of the total variance, where
+$$
+d_k=\sum_{j=1}^p \lambda_{j k}^2
+$$
+i.e. square sum of column entries (assuming column is the factor loadings)
+\smallskip
+
+\textbf{Note:} Preferred to work with standardized data, equivalent to \textit{\textbf{using the sample correlation matrix}} $R$ instead of sample covariance matrix $S$.
+\smallskip
+Then, for each variable $X_i$, $$(\text{Factor 1})^2 + (\text{Factor 2})^2 = \text{Communality,} \; h_j^2$$
+and
+$$
+\text{Specific Var,} \; \psi_j = 1 - \text{Communality}
+$$
+
+\textbf{Large Sample Test for No. of Common Factors:}
+It can be shown that
+$$
+\chi^2=\left(n-1-\frac{2 p+4 m+5}{6}\right) \log \left(\frac{\left|\widehat{\Lambda} \widehat{\Lambda}^T+\widehat{\Psi}\right|}{\left|S_n\right|}\right) \sim \chi^2(q),
+$$
+where $q=\frac{1}{2}\left((p-m)^2-p-m\right)$, where $m$ denotes no. of factors, $p$ dimension of the data.
+
+
+\smallskip
+\hline
+\smallskip
+\subheading{Ch 9: Classification}
+
+\underline{Minimum ECM Classification Rule:} Assign $x_0$ to $\pi_t$ if
+$$
+\sum_{k=1}^m p_k p(t|k) c(t|k)
+$$
+is the smallest among all such sums (i.e. for different classes $t=$ $1, \cdots, m)$
+
+\textbf{When $\mathbf{m=2}$:} Assign $x_0$ to $\pi_1$ if
+$$\frac{f_1(\mathbf{x})}{f_2(\mathbf{x})} \geq \frac{c(1 | 2)}{c(2 | 1)} \frac{p_2}{p_1}$$
+assign to $\pi_2$ otherwise. \\ \smallskip
+\subheading{Two Multivariate Normal Populations:}
+
+\textbf{(a) Equal prior and equal misclassification costs:} \\
+\underline{\textbf{Case 1:} $\mathbf{\Sigma = \Sigma_1 = \Sigma_2}$} \\
+
+Under this assumption, we assign $x_0$ to $\pi_1$ only if
+$$
+d_1\left(\underline{x}_0\right)<d_2\left(\underline{x}_0\right)
+$$
+where
+and
+$$
+d_i(\underline{x})=\left(\underline{x}-\bar{x}_i\right)^T \hat{\Sigma}^{-1}\left(\underline{x}-\underline{\bar{x}}_i\right)
+$$
+$$
+\hat{\Sigma}=S_{\text {pool }}=\frac{\left(n_1-1\right) S_1+\left(n_2-1\right) S_2}{n_1+n_2-2}
+$$
+Equivalently, we may rewrite $d_1\left(\underline{x}_0\right)<d_2\left(\underline{x}_0\right)$ as $d_{12}\left(\underline{x}_0\right)>0$ where $d_{12}\left(\underline{x}_0\right)$ given by
+$$
+\left(\underline{\underline{x}}_1-\underline{\bar{x}}_2\right)^T S_{\text {pool }}^{-1} \underline{x}_0-\frac{1}{2}\left(\underline{\bar{x}}_1-\underline{\bar{x}}_2\right)^T S_{\text {pool }}^{-1}\left(\underline{\bar{x}}_1+\underline{\bar{x}}_2\right)
+$$
+\underline{\textbf{Case 2:} $\mathbf{\Sigma_1 \neq \Sigma_2}$} (Use $S_1$ and $S_2$) \\
+Assign $\underline{x}_0$ to $\pi_1$ if
+$$
+d_1\left(\underline{x}_0\right)+\log \left|S_1\right|<d_2\left(\underline{x}_0\right)+\log \left|S_2\right|
+$$
+where $d_i\left(\underline{x}_0\right)=\left(\underline{x}_0-\underline{x}_i\right)^T S_i^{-1}\left(\underline{x}_0-\underline{x}_i\right)$ for $i=1,2$.
+\smallskip
+\textbf{(b) General Prior and Misclassification Costs:} \\
+\underline{\textbf{Case 1:} $\mathbf{\Sigma = \Sigma_1 = \Sigma_2}$} \\
+
+Assign $\underline{x}_0$ to $\pi_1$ if
+$$
+d_{12}\left(\underline{x}_0\right)>k = \log\left(\frac{p2 \; c(1|2)}{p1 \; c(2|1)}\right)
+$$
+where $d_{12}(x_0)$ given by
+$$
+\begin{aligned}
+\left(\underline{\mu}_1-\underline{\mu}_2\right)^T \Sigma^{-1} \underline{x}_0-\frac{1}{2}\left(\underline{\mu}_1-\underline{\mu}_2\right)^T \Sigma^{-1}\left(\underline{\mu}_1+\underline{\mu}_2\right)
+\end{aligned}
+$$
+where
+$$
+\hat{p}_1=\frac{n_1}{n_1+n_2} \quad \text{and} \quad \hat{p}_2=\frac{n_2}{n_1+n_2}
+$$
+\underline{\textbf{Case 2:} $\mathbf{\Sigma_1 \neq \Sigma_2}$} \\
+
+Assign $\underline{x}_0$ to $\pi_1$ if
+$$
+\frac{1}{2}\left\{\left[d_2\left(\underline{x}_0\right)-d_1\left(\underline{x}_0\right)\right]+\log \frac{\left|S_2\right|}{\left|S_1\right|}\right\}>k
+$$
+where $d_i(x)=\left(\underline{x}-\underline{x}_i\right)^T S_i^{-1}\left(\underline{x}-\underline{x}_i\right)$ for $i=1,2$, and $k=\log \left(\frac{p_2 c(1 \mid 2)}{p_1 c(2 \mid 1)}\right)$
+\smallskip
+\end{multicols*}
+\end{document}

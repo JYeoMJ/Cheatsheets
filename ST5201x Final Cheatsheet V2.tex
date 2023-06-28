@@ -1,0 +1,689 @@
+\documentclass[a4paper]{article}
+\usepackage[
+    a4paper, left=1cm, right=1cm, top=1cm, bottom=1cm, landscape
+]{geometry}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}             % \mathbb
+\usepackage{amssymb}              % \nmid
+\usepackage{booktabs}             % for toprule
+\usepackage[makeroom]{cancel}     % \cancel in math
+\usepackage{environ}              % scaletikzpicturetowidth env
+\usepackage{enumitem}             % [leftmargin=*]
+\usepackage{fancyvrb}             % center-able BVerbatim env
+\usepackage{IEEEtrantools}
+\usepackage{multicol}
+\usepackage[graphicx]{realboxes}  % Rotatebox for the table
+\usepackage{tabularx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+\usepackage{accents}
+
+
+% heading macros
+\newcommand{\heading}[1]{{\small\underline{\textbf{#1}}}}
+\newcommand{\subheading}[1]{{\scriptsize\textbf{#1}}}
+
+% math macros
+\newcommand{\expectation}[1]{\operatorname{E}[#1]}
+\newcommand{\ddx}{\frac{d}{dx}}
+\DeclareMathOperator{\Rank}{Rank}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\MSE}{MSE}
+\DeclareMathOperator{\eff}{eff}
+\DeclareMathOperator{\Cov}{Cov}
+
+
+% make itemize use dash (-) instead of bullet
+\renewcommand\labelitemi{-}
+
+% scale tikz to column width
+\makeatletter
+\newsavebox{\measure@tikzpicture}
+\NewEnviron{scaletikzpicturetowidth}[1]{%
+  \def\tikz@width{#1}%
+  \def\tikzscale{1}\begin{lrbox}{\measure@tikzpicture}%
+  \BODY
+  \end{lrbox}%
+  \pgfmathparse{#1/\wd\measure@tikzpicture}%
+  \edef\tikzscale{\pgfmathresult}%
+  \BODY
+}
+\makeatother
+
+\begin{document}
+
+\scriptsize                         % Small fonts
+\pagenumbering{gobble}              % No page numbers
+\setlength\parindent{0pt}           % No indents at start of paragraphs
+\setlength{\abovedisplayskip}{3pt}  % Less spacing before equations
+\setlength{\belowdisplayskip}{3pt}  % less spacing after equations
+
+% TITLE %A
+\begin{center}
+  {\large ST5201x Finals Cheatsheet}
+\end{center}
+
+% BODY %
+\begin{multicols*}{4}
+
+% \subheading{insert title}
+% \smallskip
+\subheading{Permutation Test}
+
+Let $\mathcal{S}_X=\left\{X_1, \cdots, X_n\right\}$ and $\mathcal{S}_Y=\left\{Y_1, \cdots, Y_m\right\}$ be two samples and $T\left(\mathcal{S}_X, \mathcal{S}_Y\right)$ be a test statistic. 
+\setlist{nolistsep}
+\begin{enumerate}
+    \item Pool samples to form joint sample $\mathcal{S}_{X Y}=\left\{X_1, \cdots, X_n, Y_1, \cdots, Y_m\right\}$.
+    \item Randomly permute elements in $\mathcal{S}_{X Y}$ and split them into two samples $\mathcal{S}_X^*$ and $\mathcal{S}_Y^*$.
+    \item Treating $\mathcal{S}_X^*$ and $\mathcal{S}_Y^*$ as the original sample, compute the test statistic $T\left(\mathcal{S}_X^*, \mathcal{S}_Y^*\right)$.
+    \item Repeat the above two procedures several times, record the value of test statistic of each time.
+\end{enumerate}
+Repeating $B$ times, we obtain $B$ values of the test statistic $T^{*(1)}, \cdots, T^*(B)$. Then we compute the $p$-value of testing $H_0: F_X = F_Y$ (2-sided) as
+$$
+\text { p-value }=2 \times \frac{1}{B} \sum_{\ell=1}^B I\left(\left|T^{*(\ell)}\right| \geq\left|T\left(\mathcal{S}_X, \mathcal{S}_Y\right)\right|\right)
+$$
+\subheading{Mann-Whitney U-test}
+
+Rank-sum test $\Rightarrow \{R_1,\dots, R_n, R_{n+1},\dots,R_{n+m}\}$. 
+Assign ranks to all observations. Smaller rank, lower value. Use test statistic $T(X_1,\dots,Y_m) = \sum_{i=1}^{n} R_i$ i.e. sum of ranks of x-observations. Under null, $\{R_1,\dots, R_n\}$ is a random subset of $\{1,\dots, n+m\}$.
+\smallskip
+\subheading{Wilcoxon Rank Sum (Signed Rank) Test}
+
+Consider paired samples i.e. $(x_1,y_1),\dots,(x_n,y_n)$, compute rank of absolute value of differences
+$$
+T(X_1,\dots,Y_n) = \sum_{i=1}^{n} \operatorname{sign}(x_i-y_i)R_i
+$$
+where $R_i = \operatorname{rank}(|x_i-y_i|)$. $\text { p-value } = Pr(T\geq T_{obs})$. Under null, $T = \sum_{i=1}^n i \cdot Z_i$ where $Z\sim Ber(0.5)$
+
+\smallskip
+\hline
+\smallskip
+\subheading{Empirical CDF}
+$$\widehat{F}_n\left(x_0\right)=\frac{1}{n} \sum_{i=1}^n I\left(X_i \leq x_0\right)$$
+\textbf{MSE and Integrated MSE (MISE):} 
+$$
+\operatorname{MSE}(x)=\mathbb{E}\left\{\left(\hat{p}_n(x)-p(x)\right)^2\right\}
+$$
+$$
+\begin{aligned}
+\operatorname{MISE}\left(\widehat{p}_n(x)\right)&=\mathbb{E}\left(\int\left(\widehat{p}_n(x)-p(x)\right)^2\right) \\
+&= \int \mathbb{E} \{\widehat{p}_n(x)-p(x)\}
+\end{aligned}
+$$
+\hline
+\smallskip
+
+\subheading{Histogram Density Estimator}
+
+Consider the partition of $[0,1]$ into $M$ bins
+$$
+B_1=[0, \frac{1}{M}), B_2=[\frac{1}{M}, \frac{2}{M}), \cdots, B_M=\left[\frac{M-1}{M}, 1\right] .
+$$
+Then for a given point $x \in B_{\ell}$, the density estimator from the histogram will be
+$$
+\begin{aligned}
+\widehat{p}_n(x)&=\frac{\text { No. observations in } B_{\ell}}{n} \times \frac{1}{\text { length of the bin }}\\
+&=\frac{M}{n} \sum_{i=1}^n I\left(X_i \in B_{\ell}\right) \text {. }
+\end{aligned}
+$$
+
+\textbf{Bias-Variance Tradeoff} 
+$$
+\begin{aligned}
+\operatorname{MSE}\left(\widehat{p}_n&(x)\right))=\operatorname{bias}^2\left(\widehat{p}_n(x)\right)+\operatorname{Var}\left(\widehat{p}_n(x)\right) \\
+&\leq \frac{L^2}{M^2}+M \cdot \frac{p\left(x^*\right)}{n} = 2\left(\frac{Lp(x^*)}{n}\right)^{2/3}
+\end{aligned}
+$$
+
+taking $M_{\mathrm{opt}}=\left(\frac{n \cdot L^2}{p\left(x^*\right)}\right)^{1 / 3}$. 
+
+\textbf{MISE:} Suppose that $f^{\prime}$ is absolutely continuous and that $\int\left(f^{\prime}(u)\right)^2 d u<\infty$. Then the MISE
+$$
+R\left(\widehat{f}_n, f\right)=\frac{h^2}{12} \int\left(f^{\prime}(u)\right)^2 d u+\frac{1}{n h}+o\left(h^2\right)+o\left(\frac{1}{n}\right)
+$$
+The value $h^*$ that minimizes the MISE is
+$$
+h^*=\frac{1}{n^{1 / 3}}\left(\frac{6}{\int\left(f^{\prime}(u)\right)^2 d u}\right)^{1 / 3}
+$$
+With this choice of binwidth,
+$$
+R\left(\widehat{f}_n, f\right) \sim \frac{C}{n^{2 / 3}} \;, C=(3 / 4)^{2 / 3}\left(\int\left(f^{\prime}(u)\right)^2 d u\right)^{1 / 3}
+$$
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{Kernel Density Estimator}
+
+Given a kernel $K$ and bandwidth $h > 0$, the kernel density estimator is defined to be
+$$
+\widehat{f}_n(x)=\frac{1}{n} \sum_{i=1}^n \frac{1}{h} K\left(\frac{x-X_i}{h}\right) .
+$$
+
+\textbf{MISE Bound:} $R=O(n^{-4/5})$ where $h^* = Cn^{-1/5}$
+For smooth densities and Normal kernel, use the bandwidth
+$
+h_n=\frac{1.06 \widehat{\sigma}}{n^{1 / 5}}
+$
+where
+$
+\widehat{\sigma}=\min \left\{s, \frac{Q}{1.34}\right\} .
+$
+
+\subheading{Nadaraya-Watson Kernel Regression}
+
+The Nadaraya-Watson kernel estimator is defined by
+$$
+\widehat{r}_n(x)=\sum_{i=1}^n \ell_i(x) Y_i
+$$
+where $K$ is a kernel, and the weights $\ell_i(x)$ are given by
+$$
+\ell_i(x)=\frac{K\left(\frac{x-x_i}{h}\right)}{\sum_{j=1}^n K\left(\frac{x-x_j}{h}\right)} .
+$$
+\smallskip
+\textbf{MISE Bound:} Risk of the estimator, $R(\widehat{r}_n, r) =$
+$$
+\begin{aligned}
+&\frac{h_n^4}{4} (\int x^2 K(x) d x)^2\int(r^{\prime \prime}(x) +2 r^{\prime}(x) \frac{f^{\prime}(x)}{f(x)})^2 d x\\
+&+\frac{\sigma^2 \int K^2(x) d x}{n h_n} \int \frac{1}{f(x)} d x+o\left(n h_n^{-1}\right)+o\left(h_n^4\right) \\
+\end{aligned}
+$$
+as $h_n \rightarrow 0$ and $n h_n \rightarrow \infty$.
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{Leave-One-Out Cross Validation (LOOCV)}
+
+The LOOCV score is defined by
+$$
+\mathrm{CV}=\widehat{R}(h)=\frac{1}{n} \sum_{i=1}^n\left(Y_i-\widehat{r}_{(-i)}\left(x_i\right)\right)^2
+$$
+where $\widehat{r}_{(-i)}$ is the estimator obtained by omitting the $i$-th pair $\left(x_i, Y_i\right)$.
+\smallskip
+
+\textbf{Theorem:} Let $\widehat{r}_n$ be a linear smoother. Then the LOOCV score $\widehat{R}(h)$ can be written as
+$$
+\widehat{R}(h)=\frac{1}{n} \sum_{i=1}^n\left(\frac{Y_i-\widehat{r}_n\left(x_i\right)}{1-L_{i i}}\right)^2
+$$
+where $L_{i i}=\ell_i\left(x_i\right)$ is the $i$-th diagonal element of the smoothing matrix $L$.
+\smallskip
+
+\textbf{Theorem:} The cross-validation estimator of risk is
+$$
+\widehat{J}(h)=\int\left(\widehat{f}_n(x)\right)^2 d x-\frac{2}{n} \sum_{i=1}^n \widehat{f}_{(-i)}\left(X_i\right)
+$$
+where $\widehat{f}_{(-i)}$ is the density estimator obtained after removing the $i$-th observation. 
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{Bootstrap Distribution}
+
+Given statistic $T(\cdot)$, and data $\{X_1,\dots,X_n\}$, want to estimate distribution of $T(X_1,\dots,X_n)$.
+\begin{itemize}
+    \item Simulate $B$ bootstrap samples $\{X_1^*,\dots,X_n^*\}$ (sampling with replacement) 
+    \item Compute $T^* = T(X_1^{*},\dots,X_n^{*})$ for ea. sample $\Rightarrow \{T_1^*,\dots,T_B^*\}$
+\end{itemize}
+Then the bootstrap estimate of variance is given by
+$$
+\hat{se}^2_{\text {boot }}=\frac{1}{B} \sum_{b=1}^B\left(T_{b}^*-\frac{1}{B} \sum_{\ell=1}^B T_{\ell}^*\right)^2
+$$
+
+\hline
+\smallskip
+\subheading{Bootstrap Confidence Intervals}
+
+\subheading{1. Normal Interval}
+
+Assume $\mathrm{T}_{\mathrm{n}}$ approximately normal. Then,  distribution of $T_n-\mathbb{E} T_n \approx \mathcal{N}\left(0, \operatorname{Var}_F\left(T_n\right)\right) \approx \mathcal{N}(0, \hat{se}_{\text{boot}}^2)$.
+$$
+\mathrm{CI}_\alpha=\left(T_n-z_{\alpha / 2} \hat{se}_{\text{boot}}, T_n+z_{\alpha / 2} \hat{se}_{\text{boot}}\right)
+$$
+Poor coverage if dist. of $T_n$ is not close to normal.
+
+\subheading{2. Pivotal Interval}
+$$
+C_n=\left(2 \widehat{\theta}_n-\widehat{\theta}_{((1-\alpha / 2) B)}^*, 2 \widehat{\theta}_n-\widehat{\theta}_{((\alpha / 2) B)}^*\right) .
+$$
+\textbf{Note:} Pointwise, asymptotic confidence interval.
+
+\subheading{3. Studentized Pivotal}
+$$
+\left(T_n-z_{1-\alpha / 2}^* \widehat{\operatorname{se}}_{\mathrm{boot}}, T_n-z_{\alpha / 2}^* \widehat{\operatorname{se}}_{\mathrm{boot}}\right)
+$$
+where $z_\beta^*$ is the $\beta$ quantile of $Z_{n, 1}^*, \ldots, Z_{n, B}^*$ and
+$$
+Z_{n, b}^*=\frac{T_{n, b}^*-T_n}{\hat{\operatorname{se}}_b^*} .
+$$
+\subheading{4. Percentile Interval}
+$$
+C_n=\left(T_{(B \alpha / 2)}^*, T_{(B(1-\alpha / 2))}^*\right),
+$$
+\hline
+\smallskip
+
+\subheading{Direct Sampling (Inverse CDF Transform)}
+$$
+\text{Pr}(F^{-1}(U)\leq x)=\text{Pr}(U \leq F(x)) = F(x)
+$$
+e.g. Let $U = F(x) = 1-e^{-x}$ where $U \sim Unif(0,1)$. $$\Rightarrow X = -ln(1-U) \sim Exp(1)$$
+
+\subheading{Rejection Sampling}
+
+\textbf{Goal:} Sample from unknown density $f(\theta)$. Suppose we have a known function $h(\theta) \propto f(\theta)$.
+$$
+\begin{aligned}
+&h(\theta) \rightarrow \text{target density} \\
+&g(\theta) \rightarrow \text{proposal density}
+\end{aligned}
+$$
+Need to find $M$ such that 
+$$
+h(\theta) \leq Mg(\theta) \iff M \geq \frac{h(\theta)}{g(\theta)}
+$$
+Optimal $M = \underset{\theta}{\text{sup}} \frac{h(\theta)}{g(\theta)}$ (i.e. maximized over $\theta$)
+\begin{enumerate}
+    \item Generate $\theta^{(s)} \sim g(\theta) $ (proposal), \\ and $U \sim Unif(0,1)$
+    \item If $U < \frac{h(\theta)}{Mg(\theta)}$, accept $\theta^{(s)}$, else reject.
+\end{enumerate}
+Taking $h(\theta)= cf(\theta)$ for some constant $c$, then
+$$
+\text{Accept Rate} = \frac{\int h(\theta)}{\int M g(\theta) d\theta} = \frac{c}{M}
+$$
+
+\subheading{Importance Sampling}
+
+Let $f(x)=h(x)/c$ where $h$ known, $c$ unknown. Want to est $\mathbf{E}_f(k(x))$ for some function $k$. Use proposal density $g$ to estimate:
+$$
+\begin{aligned}
+\hat E_f(k(x))&=\frac{\frac1n \sum w(x_i) k(x_i) }{\frac1n \sum w(x_i)} \; \Rightarrow w(x) = \frac{h(x)}{g(x)} \\
+ESS&=\frac1{\sum \hat w_i^2} \Rightarrow  \hat w_i = \frac{w(x_i)}{\sum w(x_i)}
+\end{aligned}
+$$
+where $ESS$ denotes effective sample size.
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{Markov Chains}
+
+Denote the transition probability from state $i$ to state $j$ at time $t+1$ by 
+$$
+p_{i j}=P\left(X_{t+1}=j \mid X_t=i\right)
+$$
+   
+Given K states, the transition matrix is given by
+
+$$
+P=\left(\begin{array}{cccc}
+p_{11} & p_{12} & \cdots & p_{1 K} \\
+p_{21} & p_{22} & \cdots & p_{2 K} \\
+\vdots & \vdots & & \vdots \\
+p_{K 1} & p_{K 2} & \cdots & p_{K K}
+\end{array}\right)
+$$
+
+where each row represents a distribution (sums to one). Let  the row vector $\mu_t$ be the distribution of $X_t$ :
+$$
+\mu_t(x)=\mathbf{P}\left\{X_t=x\right\} \quad \text { for all } x \in \Omega .
+$$
+By conditioning on the possible predecessors of the $(t+1)$-st state, we see that
+$$
+\begin{aligned}
+\mu_{t}(y)&=\sum_{x \in \Omega} \mathbf{P}\left\{X_{t-1}=x\right\} P(x, y)\\
+&=\sum_{x \in \Omega} \mu_{t-1}(x) P(x, y) \;\; \text { for all } y \in \Omega \text {. }
+\end{aligned}
+$$
+Rewriting this in vector form gives
+$$
+\mu_{t}=\mu_{t-1} P =\dots= \mu_0 P^t \quad \text { (matrix power) }
+$$
+\subheading{Stationary Distribution}
+
+Suppose $\mu_t \rightarrow \pi$ converges to fixed distribution, then $$\pi P = \pi \quad \text{(stationary distribution)}$$
+$$
+\pi(y)=\sum_{x \in \Omega} \pi(x) P(x, y) \quad \text{for all} \; y \in \Omega
+$$
+\textbf{Detailed Balance Equations:}
+$$
+\pi(x) P(x, y)=\pi(y) P(y, x) \quad \text{for all }x, y \in \Omega
+$$
+\textbf{Note:} Detailed balance implies balance. 
+
+\subheading{Convergence}
+\begin{itemize}
+    \item A Markov chain $P$ is \textbf{irreducible} if for all pair of states $i, j$, there exists a $t>0$ such that $p_{i j}(t)>0$.
+    \item A state is periodic if the MC can only return to it at regular intervals. A chain is \textbf{aperiodic} if it has no periodic states.
+\end{itemize}
+\textbf{Theorem:} If P is irreducible and aperiodic, then $\mu_t$ converges to unique stationary distribution.
+\smallskip
+
+\subheading{Simple Random Walk (Graphs)}
+
+Define simple random walk on graph, $G$ to be the Markov chain with state space $V$ and transition matrix
+$$
+P(x, y)= \begin{cases}\frac{1}{\operatorname{deg}(x)} & \text { if } y \sim x \\ 0 & \text { otherwise }\end{cases}
+$$
+with stationary distribution given by
+$$
+\pi(y)=\frac{\operatorname{deg}(y)}{2|E|} \quad \text { for all } y \in \Omega
+$$
+where $|E|$ denotes no. of edges.
+\smallskip
+\hline
+\smallskip
+
+\subheading{Markov Chain Monte-Carlo}
+
+Suppose we want to modify simple random walk to achieve a specified target distribution. Modify RW with rejection sampling.
+\\
+\textbf{New Transition Probabilities:}
+$$
+Q(x, y)= \begin{cases}P(x, y) a(x, y) & \text { if } y \neq x \\ 1-\sum_{z \neq x} P(x, z) a(x, z) & \text { if } y=x\end{cases}
+$$
+\\
+\textbf{Acceptance Probability:}
+$$a(x, y)=\min \left\{\frac{\pi(y) P(y, x)}{\pi(x) P(x, y)}, 1\right\}$$
+\subheading{Metropolis-Hastings Algorithm }
+
+1. Choose initial $\theta^{(0)}$, for which $p\left(\theta^{(0)} \mid y\right)>0$.
+
+2. For $t=1,2, \ldots$ :
+    \begin{itemize}
+        \item Sample a proposal $\theta^*$ from the proposal distribution $g\left(\theta^* \mid \theta^{(t-1)}\right)$
+        \item Compute the ratio $$r=\frac{f\left(\theta^*\right) g\left(\theta^{(t-1)} \mid \theta^*\right)}{f\left(\theta^{(t-1)}\right) g\left(\theta^* \mid \theta^{(t-1)}\right)}$$
+        $$
+        \text{Set}\;\;  \theta^{(t)}= \begin{cases}\theta^* & \text {with prob.}\min \{r, 1\} \\ \theta^{(t-1)} & \text { otherwise. }\end{cases}
+        $$
+        where $f$ denotes stationary distribution
+    \end{itemize}
+
+\smallskip
+\subheading{Autocorrelation of stationary Markov Chain}
+$$
+\rho_L = \frac{\sum_{t=0}^{T-L} (f(\theta_t)-\overline{f(\theta)}) (f(\theta_{t+L})-\overline{f(\theta)})}{\sum_{t=0}^{T} (f(\theta_t)-\overline{f(\theta)})^2}
+$$
+
+\subheading{Effective Sample Size (ESS)}
+
+Let $T$ be number of samples and unknown but stationary $f(\theta_t)$ be drawn from some MCMC algorithm. ESS is
+$$
+T \times(1 + 2 \sum_{L}^\infty \rho_L)^{-1}
+$$
+\smallskip
+\hline
+\smallskip
+\subheading{Bernoulli Distribution, $X \sim Ber(p)$}
+$$P(X = x) = \begin{cases}
+  p^x(1-p)^x & \text{ if $x = 0$ or $x = 1$} \\
+  0   & \text{ otherwise}
+\end{cases}$$
+
+Its MGF, $M(t) = 1-p + pe^t$.\smallskip
+
+\subheading{Binomial Distribution, $Y \sim Bin(n,p)$ }
+$$P(Y=k) = \binom{n}{k}p^k(1-p)^{n-k}$$
+
+MGF: $(1-p+pe^t)^n$
+\smallskip
+
+\subheading{Poisson Distribution}
+$$P(X=k) = \frac{\lambda^k e^{-\lambda}}{k!}$$
+
+$E[X] = Var(X) = \lambda$, and MGF $M(t) = e^{\lambda(e^t-1)}$. \smallskip
+
+\subheading{Geometric Distribution, $X \sim Geom(p)$}
+
+Number of trials until the first success.
+
+$$P(X=k) = (1-p)^{k-1}p$$
+
+$E[X] = 1/p$ and $Var(X) = (1-p)/p^2$, and MGF, $M(t) = pe^t/(1 - (1-p)e^t)$. \smallskip
+
+\textbf{Note: } (Tail Probability Formula)
+$$
+P(X\geq K) = \sum_{i=k}^{\infty}p(1-p)^{i-1} = p\frac{(1-p)^{k-1}}{1-(1-p)} = (1-p)^{k-1}
+$$
+
+\subheading{Negative Binomial, $X\sim NegBin(r,p)$}
+
+Suppose that a sequence of independent trials performed such that there are $r$ successes in total.
+$$
+P(X=k) = \binom{k-1}{r-1} (1-p)^{k-r}p^r
+$$
+
+Equivalently, $X = Y_1 + \dots + Y_r$ where $Y_i's$ are i.i.d. $Geom(p)$.  $E[X] = r/p$ and $Var(x) = r(1-p)/p^2$
+\smallskip
+
+\subheading{Hypergeometric Distribution}
+
+Given population of size $N$, of which $M$ are of type I, $N-M$ are of type II, want to draw $n$ samples without replacement, then
+
+$$
+P(X=k) = \frac{\binom{M}{k} \binom{N-M}{n-k}}{\binom{N}{n}} \quad \quad  0 \leq k \leq n
+$$
+where $X$ is the number of Type I selected. 
+\smallskip
+
+\subheading{Uniform Random Variable, $X \sim Unif(a,b)$}
+$$f_X(x) = \begin{cases}
+  \frac{1}{b-a} & \text{ for $a \leq x \leq b$} \\
+  0   & \text{ otherwise}
+\end{cases}$$
+
+Note that for any $(x,y)\in [a,b]$:
+$$
+P(x < X < y) = \frac{y-x}{b-a}
+$$
+Mean, Variance and MGF:
+$$
+\expectation{X} = \frac{a+b}{2} \;\;, \Var(X) = \frac{(b-a)^2}{12} \;\;, M(t) = \frac{e^t-1}{t}
+$$
+CDF:
+$$F_X(x) = \begin{cases}
+  0   & \text{ for $x<a$} \\
+  \frac{x-a}{b-a} & \text{ for $x \in [a,b]$} \\
+  1   & \text{ if $x>b$}
+\end{cases}$$
+
+
+\subheading{Exponential Random Variable}
+
+$X\sim Exp(\lambda)$ where $\lambda > 0$ if it has the pdf
+
+$$
+f_X(x) = \lambda e^{-\lambda x} \quad x \geq 0 \quad (0 \;  \text{otherwise})
+$$
+whereby its mean and variance are given by $1/\lambda$ and $1/\lambda^2$ respectively. MGF is $\lambda/(\lambda-t)$.
+\smallskip
+\hline
+\smallskip
+\subheading{Method of Moments Estimators}
+
+The $k$-th moment of a probability law is defined as
+$$
+\mu_k=\expectation{X^k}
+$$
+If $X_1, X_2, \ldots, X_n$ are iid random variables from that distribution, the $k$-th sample moment is defined as
+$$
+\hat{\mu}_k=\frac{1}{n} \sum_{i=1}^n X_i^k
+$$
+where $\hat{\mu}_k$ can be taken as an estimate of $\mu_k$.
+\smallskip
+
+\subheading{MLE for Multinomial Cell Probabilities}
+
+The likelihood is the joint frequency function
+$$
+\operatorname{lik}\left(p_1, \ldots, p_m\right)=\frac{n !}{\prod_{i=1}^m x_{i} !} \prod_{i=1}^m p_i^{x_i}
+$$
+
+Note: Marginal distribution of each $X_i$ is $Bin\left(n, p_i\right)$.
+
+The log likelihood is
+$$
+l\left(p_1, \ldots, p_m\right)=\log n !-\sum_{i=1}^m \log x_{i} !+\sum_{i=1}^m x_i \log p_i
+$$
+
+
+\subheading{Bootstrap Procedure - Multinomial Example}
+
+Boostrap procedure for approximating the sampling distributions of $\hat{\theta}$:
+\setlist{nolistsep}
+\smallskip
+\begin{enumerate}
+    \item Assume multinomial distribution with $\hat{\theta}$ provides a good fit to the data
+    \item Simulate $N$ random samples from multinomial distribution with corresponding probabilities $p_1,p_2,p_3$ and $n = 1029$.
+    \item For ea. random sample, calculate MLE, $\theta^*$ of $\theta$
+    \item Use the $N$ values of $\theta^*$ to approximate the sampling distributions of $\hat{\theta}$
+\end{enumerate}
+\smallskip
+The standard error of $\hat{\theta}$ can be estimated using
+$$
+s_{\hat{\theta}} = \sqrt{\frac{1}{N}\sum_{i=1}^N (\theta^*_i - \bar{\theta})^2} \quad \text{where} \quad \bar{\theta} = \frac{1}{N}\sum_{i=1}^N \theta^*_i
+$$
+
+\subheading{Consistency}
+
+  Let $\hat{\theta}_n$ be an estimate of a parameter $\theta_0$ based on a
+  sample of size $n$. $\hat{\theta}_n$ is said to be consistent in probability if
+  $\hat{\theta}_n$ converges in probability to $\theta_0$ as $n$ approaches
+  infinity. That is, for $\epsilon > 0$,
+  $$P(|\hat{\theta}_n - \theta_0| > \epsilon) \rightarrow 0 \text{ as } n
+  \rightarrow \infty$$
+  
+\subheading{Fisher Information (Lemma A)}
+  \begin{align*}
+    I(\theta) &= \operatorname{E} \left [
+      \frac{\partial}{\partial\theta} \log f(X|\theta)
+    \right ]^2 \\
+      &= - \operatorname{E} \left [
+        \frac{\partial^2}{\partial\theta^2} \log f(X|\theta)
+    \right ]
+  \end{align*}
+
+\subheading{Large Sample Theory for MLE}
+
+  Let $\hat{\theta}$ denote the MLE of $\theta_0$. The probability distribution
+  of
+  $$\sqrt{nI(\theta_0)}(\hat{\theta} - \theta_0)$$
+  tends to a standard normal distribution. Therefore, the asymptotic variance of
+  the MLE is
+  $$\frac{1}{nI(\theta)} = - \frac{1}{\expectation{l''(\theta_0)}}$$
+
+\subheading{Efficiency}
+
+  The efficiency of two estimators, $\hat{\theta}_0, \hat{\theta}_1$ is given as
+  $$\eff(\hat{\theta}_0, \hat{\theta}_1) :=
+    \Var(\hat{\theta}_1)/\Var(\hat{\theta}_0)$$
+  
+  If the effficiency is smaller than $1$, then $\Var(\hat{\theta}_1)< \Var(\hat{\theta}_0)$
+
+\subheading{Cramer-Rao Lower Bound}
+
+  Under smoothness assumptions of a $f(x|\theta)$ for a statistic $T:=t(X_1,
+  \cdots, X_n)$
+  $$\Var(T) \geq \frac{1}{nI(\theta)}$$
+  This gives the lower bound for the variance of any estimator of $\theta$. \smallskip
+
+\subheading{Sufficiency}
+
+A statistic $T(X_1, \cdots, X_n)$ is said to be sufficient for $\theta$ if the
+  conditional distribution of $X_1, \cdots, X_n$ given $T=t$ does not depend on
+  $\theta$ for any value of $t$. If $T$ is sufficient for $\theta$, the MLE for
+  $\theta$ is a function only of $T$.
+  \smallskip
+
+\subheading{Factorization Theorem}
+
+  The statistic $T(X_1, \cdots, X_n)$ is sufficient for a parameter $\theta$ iff
+  the joint pdf factorises in the form
+  $$f(\vec{x}|\theta) = g(T(\vec{x}), \theta)h(\vec{X})$$
+
+\subheading{Generalized Likelihood Ratio Test}
+
+  Denote the null and
+  alternative hypotheses as $H_0: \theta \in \omega_0$ and $H_1: \theta \in
+  \omega_1$ respectively, where $\omega_0, \omega_1$ are disjoint and subsets of
+  $\Omega$, the sample space. The generalised likelihood ratio test statistic is
+  $$\Lambda^* = \frac{
+    \max_{\theta \in \omega_0} L(\theta)
+  }{
+    \max_{\theta \in \omega_1} L(\theta)
+  }$$
+  For simplicity, we define $\Lambda$ such that $\Lambda = \min(\Lambda^*, 1)$.
+  $$\Lambda = \frac{
+    \max_{\theta \in \omega_0} L(\theta)
+  }{
+    \max_{\theta \in \Omega} L(\theta)
+  }$$
+  Then, the generalised likelihood test rejects for $\Lambda \leq \lambda_0$,
+  where $P(\Lambda \leq \lambda_0 | H_0) = \alpha$.
+\smallskip
+
+\subheading{Distribution of $-2\log\Lambda$}
+
+  As the sample size $n \rightarrow \infty$, null distribution of $-2\log
+  \Lambda$ tends to a chi-square distribution with degrees of freedom $df$ as
+  $$df = \dim \Omega - \dim \omega_0$$
+  Rejecting for small $\Lambda$ is then also
+  rejecting for large $-2\log\Lambda$. 
+\smallskip
+
+\subheading{Likelihood Ratio Test (LRT)}
+
+  In the case of the simple alternative hypothesis, simply define $\Lambda$
+  directly.
+  $$\Lambda = \frac{
+    L(\theta | H_0)
+  }{
+    L(\theta | H_1)
+  }$$
+
+
+\subheading{Pearson Chi-square Test}
+
+  The Pearson chi-square test is asymptotically equal to the GLRT. The test
+  statistic for a multinomial distributed r.v. is
+  $$X^2 = \sum^m_{i=1}\frac{(O_i - E_i)^2}{E_i}
+    = \sum^m_{i=1} \frac{(x_i - np_i(\hat{\theta}))^2}{np_i(\hat{\theta})}$$
+  Where $X^2 \sim \chi^2_{m-k-1}$, $k$ is the number of values of the
+  multinomial distribution.
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{Bayesian Inference}
+
+Let unknown parameter $\Theta$ be a random variable with prior distribution. The posterior distribution is given by:
+
+$$\begin{aligned}f_{\Theta \mid X}(\theta \mid x) &=\frac{f_{X, \Theta}(x, \theta)}{f_X(x)} \\ &=\frac{f_{X \mid \Theta}(x \mid \theta) f_{\Theta}(\theta)}{\int f_{X \mid \Theta}(x \mid \theta) f_{\Theta}(\theta) d \theta} \end{aligned}$$
+
+i.e. Posterior density $\propto$ Likelihood $\times$ Prior density
+
+\smallskip
+
+\subheading{Useful Results: Beta Distribution}
+$$
+f(x) =\frac{\Gamma(a+b)}{\Gamma(a) \Gamma(b)} x^{a-1}(1-x)^{b-1}, \quad 0 \leq x \leq 1
+$$
+$$
+E(X) = \frac{a}{a+b} \quad,\quad Var(X) = \frac{ab}{(a+b)^2(a+b+)}
+$$
+
+\subheading{Beta Integral}
+
+$$\int_0^1 x^{a-1}(1-x)^{b-1}dx = \frac{\Gamma(a)\Gamma(b)}{\Gamma(a+b)}$$
+
+where 
+$$\Gamma(n) = (n-1))! \quad,\quad \Gamma(n+1) = n\Gamma(n)$$
+
+\end{multicols*}
+\end{document}

@@ -1,0 +1,599 @@
+\documentclass[a4paper]{article}
+\usepackage[
+    a4paper, left=1cm, right=1cm, top=1cm, bottom=1cm, landscape
+]{geometry}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}             % \mathbb
+\usepackage{amssymb}              % \nmid
+\usepackage{booktabs}             % for toprule
+\usepackage[makeroom]{cancel}     % \cancel in math
+\usepackage{environ}              % scaletikzpicturetowidth env
+\usepackage{enumitem}             % [leftmargin=*]
+\usepackage{fancyvrb}             % center-able BVerbatim env
+\usepackage{IEEEtrantools}
+\usepackage{multicol}
+\usepackage[graphicx]{realboxes}  % Rotatebox for the table
+\usepackage{tabularx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+\usepackage{accents}
+
+
+% heading macros
+\newcommand{\heading}[1]{{\small\underline{\textbf{#1}}}}
+\newcommand{\subheading}[1]{{\scriptsize\textbf{#1}}}
+
+% math macros
+\newcommand{\expectation}[1]{\operatorname{E}[#1]}
+\newcommand{\ddx}{\frac{d}{dx}}
+\DeclareMathOperator{\Rank}{Rank}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\MSE}{MSE}
+\DeclareMathOperator{\eff}{eff}
+\DeclareMathOperator{\Cov}{Cov}
+
+
+% make itemize use dash (-) instead of bullet
+% \renewcommand\labelitemi{-}
+
+% scale tikz to column width
+\makeatletter
+\newsavebox{\measure@tikzpicture}
+\NewEnviron{scaletikzpicturetowidth}[1]{%
+  \def\tikz@width{#1}%
+  \def\tikzscale{1}\begin{lrbox}{\measure@tikzpicture}%
+  \BODY
+  \end{lrbox}%
+  \pgfmathparse{#1/\wd\measure@tikzpicture}%
+  \edef\tikzscale{\pgfmathresult}%
+  \BODY
+}
+\makeatother
+
+\begin{document}
+
+\scriptsize                         % Small fonts
+\pagenumbering{gobble}              % No page numbers
+\setlength\parindent{0pt}           % No indents at start of paragraphs
+\setlength{\abovedisplayskip}{3pt}  % Less spacing before equations
+\setlength{\belowdisplayskip}{3pt}  % less spacing after equations
+
+% TITLE %A
+\begin{center}
+  {\large ST5209x Finals Cheatsheet}\\{Yeo Ming Jie, Jonathan}
+\end{center}
+
+% BODY %
+\begin{multicols*}{4}
+
+% \subheading{insert title}
+% \smallskip
+
+\subheading{Stationarity}
+
+$\left(X_{t}\right)$ weakly stationary if
+$$
+E(X_t) = \mu_t \quad \gamma_x(h) = \gamma_x(t+h,t)
+$$
+i.e. constant mean, acvf independent of $t$ for ea. lag $h$. 
+Strictly stationary if distribution is time invariant.
+
+\subheading{Autocovariance (ACF)}
+
+Let $\left(X_{t}\right)$ be a stationary stochastic process. The lag $h$ ACF of $\left(X_{t}\right)$ is defined as
+$$
+\rho_{X}(h)=\frac{\operatorname{Cov}\left(X_{t}, X_{t+h}\right)}{\sqrt{\operatorname{Var}\left(X_{t}\right) \operatorname{Var}\left(X_{t+h}\right)}}=\frac{\gamma_{X}(h)}{\gamma_{X}(0)} \text {. }
+$$
+
+The lag $h$ PACF of $\left(X_{t}\right)$ is defined as
+$$
+\alpha_{X}(h):=\operatorname{Corr}\left\{X_{t+h}-\hat{X}_{t+h}, X_{t}-\hat{X}_{t}\right\}
+$$
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{Time Series Decomposition}
+$$
+X_{t}=m_{t}+s_{t}+Y_{t}
+$$
+Want to forecast $\hat{X}_{t+h \mid t}$ (or $\hat{X}_{t+h}$) for 
+horizon $h$. The naive forecast is given by $\hat{X}_{t+h \mid t}:=X_{t}$.
+
+\subheading{Moving Average}
+$$
+\hat{X}_{t+h \mid t}:=\frac{X_{t}+X_{t-1}+\cdots X_{t-d+1}}{d}
+$$
+\subheading{Holt-Winters (Exponential Smoothing)}
+
+Given smoothing parameter $0< \alpha <1$:
+$$
+\hat{X}_{t+h \mid t}:=\alpha X_{t}+(1-\alpha) \hat{X}_{t \mid t-1}
+$$
+For \textbf{Holt-Winters' additive method}, we have
+$$
+\begin{gathered}
+\hat{X}_{t+h \mid t} = \ell _t + h b_t + s_{t+h-m(k+1)} \\
+\ell _t = \alpha (X_t - s_{t-m}) + (1-\alpha)(\ell _{t-1} + b_{t-1}) \\
+b_t = \beta(\ell _t - \ell _{t-1}) + (1-\beta)b_{t-1} \\
+s_t = \gamma(X_t - \ell _t - b_{t-1}) + (1-\gamma)s_{t-m}
+\end{gathered}
+$$
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{AR(1) and AR(p) processes}
+
+$\left(X_{t}\right)$ is called an $AR(1)$ process if it solves
+$$
+X_{t}=\phi X_{t-1}+Z_{t}
+$$
+\textbf{Proposition:} If $|\phi| \neq 1, X_{t}$ is a linear process. \\$|\phi|<1 \iff X_{t}$ is a \textbf{causal linear} process, where
+$$
+X_{t}=\sum_{j=0}^{\infty} \phi^{j} Z_{t-j}
+$$
+The ACVF of $\left(X_{t}\right)$ satisfies
+$$
+\gamma_{X}(h)=\frac{\phi^{|h|} \sigma^{2}}{1-\phi^{2}} = \phi^{|h|}\gamma_x(0)
+$$
+PACF, $\alpha_{X}(h) = 1$ at lag $h=0$, $\phi$ if $|h| = 1$ (else zero)
+
+\subheading{AR(p) process:}
+$$
+X_{t}=\sum_{j=1}^{p} \phi_{j} X_{t-j}+Z_{t}
+$$
+Equivalently, for $\Phi(z)=1-\sum_{j=1}^{p} \phi_{j} z^{j}$, we have
+$$
+\Phi(B) X_{t}=Z_{t}
+$$
+where $\left(X_{t}\right)$ is \textbf{causal} iff all roots of $\Phi(z)$, $z_{1}, \ldots, z_{p}$ satisfy $\left|z_{k}\right|>1$ (lie outside unit disc).
+
+\textbf{Proposition:} The ACVF of $\left(X_{t}\right)$ can be written as
+$$
+\gamma_{X}(h)=\sum_{j=1}^{l} p_{j}(h) z_{j}^{-h}
+$$
+where $z_{1}, \ldots, z_{l}$ are the unique roots of $\Phi(z)$ and for each $j, p_{j}$ is a polynomial whose order is less than the multiply of the root $z_{j}$. 
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{MA(1) and MA(p) processes}
+
+$\left(X_{t}\right)$ is called an MA(1) process if it solves
+$$
+X_{t}=Z_{t}+\theta Z_{t-1}
+$$
+\textbf{Proposition:} $\left(X_{t}\right)$ is \textbf{invertible} iff $|\theta|<1$. If $\left(X_{t}\right)$ is invertible, then
+$$
+Z_{t}=\sum_{j=0}^{\infty}(-\theta)^{j} X_{t-j}
+$$
+The ACVF of $\left(X_{t}\right)$ satisfies
+$$
+\gamma_{X}(h)= \begin{cases}\left(1+\theta^{2}\right) \sigma^{2} & h=0 \\ \theta \sigma^{2} & |h|=1 \\ 0 & |h|>1\end{cases}
+$$
+while the PACF of $\left(X_{t}\right)$ satisfies
+$$
+\alpha_{X}(h)=-\frac{(-\theta)^{h}}{1+\theta^{2}+\cdots+\theta^{2 h}}
+$$
+\subheading{MA(q) process:}
+$$
+X_{t}=Z_{t}+\sum_{j=1}^{q} \theta_{j} Z_{t-j}
+$$
+Equivalently, for $\Theta(z)=1+\sum_{j=1}^{q} \theta_{j} z^{j}$, we have
+$$
+X_{t}=\Theta(B) Z_{t}
+$$
+where $\left(X_{t}\right)$ \textbf{invertible} iff all roots of $\Theta(z), z_{1}, \ldots, z_{q}$, satisfy $\left|z_{k}\right|>1$ (lie outside unit disc).
+
+\textbf{Proposition:} The ACVF of $\left(X_{t}\right)$ satisfies
+$$
+\gamma_{X}(h)= \begin{cases}\sigma^{2} \sum_{j=0}^{q-|h|} \theta_{j} \theta_{j+|h|} & |h| \leq q \\ 0 & |h|>q,\end{cases}
+$$
+where we denote $\theta_{0}=1$.
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{ARMA(p,q) processes}
+
+$\left(X_{t}\right)$ is called an ARMA(p,q) process if
+$$
+\Phi(B) X_{t}=\Theta(B) Z_{t}
+$$
+for polynomials $\Phi(z)=1-\sum_{j=1}^{p} \phi_{j} z^{j}$, and $\Theta(z)=1+\sum_{j=1}^{q} \theta_{j} z^{j}$. Assume no common roots.
+
+\smallskip
+\hline
+\smallskip
+
+\textbf{Proposition:} (One-step-ahead forecast) 
+
+The coefficient vector for the best linear predictor for one-step ahead prediction satisfies
+$$
+\Gamma_{t} \phi_{t+1 \mid t}=\gamma_{t}
+$$
+Denote the residual variance by $\nu_{t+1 \mid t}$. We have
+$$
+\nu_{t+1 \mid t}=\gamma(0)-\gamma_{t}^{T} \Gamma_{t}^{-1} \gamma_{t}
+$$
+\subheading{Durbin-Levinson Algorithm}
+
+Define $\phi_{00}=0, \nu_{1 \mid 0}=\gamma(0)$. The following recursive relations hold for all $t \geq 1$ :
+$$
+\begin{gathered}
+\phi_{t t}=\frac{\rho(t)-\sum_{k=1}^{t-1} \phi_{t-1, k} \rho(t-k)}{1-\sum_{k=1}^{t-1} \phi_{t-1, k} \rho(k)}, \\
+\phi_{t k}=\phi_{t-1, k}-\phi_{t t} \phi_{t-1, t-k}, k=1, \ldots, t-1, \\
+\nu_{t+1 \mid t}=\nu_{t \mid t-1}\left(1-\phi_{t t}^{2}\right) .
+\end{gathered}
+$$
+\textbf{Corollary:} The prediction error satisfies
+$$
+\nu_{t+1 \mid t}=\gamma(0) \prod_{k=1}^{t}\left(1-\phi_{k k}^{2}\right) .
+$$
+\textbf{Proposition:} ($h$-step-ahead forecast). The coefficient vector for the best linear predictor for $h$-step-ahead prediction satisfies
+$$
+\Gamma_{t} \phi_{t+h \mid t}=\gamma_{h: t+h-1} \text {. }
+$$
+where $\gamma_{h: t+h-1}=(\gamma(h), \gamma(h+1), \ldots, \gamma(t+h-1))^{T}$. Denote the residual variance by $\nu_{t+h \mid t}$. We have
+$$
+\nu_{t+h \mid t}=\gamma(0)-\gamma_{h: t+h-1}^{T} \Gamma_{t}^{-1} \gamma_{h: t+h-1} .
+$$
+\textbf{Proposition:} Suppose $\left(X_{t}\right)$ is an $A R(p)$ process with parameter vector $\left(\phi_{1}, \ldots, \phi_{p}\right)$. Then, we have
+$$
+\phi_{t+1 \mid t}=\left(\phi_{1}, \phi_{2}, \ldots, \phi_{p}, 0, \ldots, 0\right)
+$$
+for any $t>p$.
+\smallskip
+\hline
+\smallskip
+
+
+\textbf{Proposition:} (Innovation residuals)
+
+Denote $U_{t}=X_{t}-\hat{X}_{t \mid t-1}$ for $t=1,2, \ldots$ 
+Then $\operatorname{Cov}\left(U_{t}, U_{s}\right)=0$ for $s \neq t$. 
+
+For each $t$, let $\theta_{t 1}, \ldots, \theta_{t t}$ be the BLP coefficients for $\hat{X}_{t+1 \mid t}$ in terms of $U_{t}, U_{t-1}, \ldots, U_{1}$, i.e. so that
+$$
+X_{t+1 \mid t}=\theta_{t 1} U_{t}+\theta_{t 2} U_{2}+\cdots+\theta_{t t} U_{1} .
+$$
+
+\subheading{Innovations Algorithm}
+
+Define $\hat{X}_{1 \mid 0}=0, \nu_{1 \mid 0}=\gamma(0)$. The following recursive relations hold for all $t \geq 1$ :
+$$
+\begin{gathered}
+\theta_{t, t-j}=\frac{\gamma(t-j)-\sum_{k=0}^{j-1} \theta_{j, j-k} \theta_{t, t-k} \nu_{k+1 \mid k}}{\nu_{j+1 \mid j}} \\
+\nu_{t+1 \mid t}=\gamma(0)-\sum_{j=0}^{t-1} \theta_{t, t-j}^{2} \nu_{j+1 \mid j} \\
+\hat{X}_{t+1 \mid t}=\sum_{j=1}^{t} \theta_{t j} U_{t+1-j}
+\end{gathered}
+$$
+for $j = 0, \dots, t-1$.
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{Forecasting for ARMA(p,q)}
+
+For an ARMA $(p, q)$ process, the BLP can be written as
+$$
+\hat{X}_{t+1 \mid t}= 
+\left\{
+\begin{aligned}
+&\sum_{j=1}^{t} \theta_{t j}U_{t+1-j} \quad \text{for} \;\;  1 \leq t<\max (p, q)  \\ 
+&\sum_{k=1}^{p} \phi_{k} X_{t+1-k}+ \sum_{j=1}^{q} \theta_{t j}U_{t+1-j} 
+\end{aligned}
+\right.
+$$
+where $U_{t+1-j} = \left(X_{t+1-j}-\hat{X}_{t+1-j \mid t-j}\right)$
+
+\textbf{Prediction Interval:}
+$$
+\hat{X}_{t+h \mid t} \pm z_{\alpha / 2} \sqrt{\nu_{t+h \mid t}}
+$$
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{Estimation for ARMA}
+
+The sample autocovariance function of a time series $\left(X_{t}\right)$ is defined as
+$$
+\hat{\gamma}(h):=\frac{1}{n} \sum_{t=1}^{n-h}\left(X_{t+h}-\bar{X}\right)\left(X_{t}-\bar{X}\right) .
+$$
+while the sample autocorrelation function is given by
+$$
+\hat{\rho}(h):=\frac{\hat{\gamma}(h)}{\hat{\gamma}(0)}
+$$
+\textbf{Proposition:} (Asymptotic normality of sample ACF) If $\left(X_{t}\right)$ is a linear WN process, then
+$$
+\sqrt{n} \hat{\rho}_{1: h} \rightarrow_{d} \mathcal{N}(0, I)
+$$
+The sample partial autocorrelation function of a time series $\left(X_{t}\right)$ is defined as $\hat{\alpha}(h)=\hat{\phi}_{h h}$, where $\hat{\phi}_{h h}$ is the last coefficient of 
+$$
+\hat{\phi}_{h+1 \mid h}=\left(\hat{\phi}_{h 1}, \ldots, \hat{\phi}_{h h}\right)
+$$
+which solves $\hat{\Gamma}_{h} \hat{\phi}_{h+1 \mid h}=\hat{\gamma}_{h}$.
+
+\subheading{Method of Moments}
+
+Yule-Walker equations for an AR(p) process:
+$$
+\hat{\Gamma}_{p} \hat{\phi}=\hat{\gamma}_{p}, \quad \hat{\sigma}^{2}=\hat{\gamma}(0)-\hat{\gamma}_{p}^{T} \hat{\Gamma}_{p}^{-1} \hat{\gamma}_{p}
+$$
+for $h \geq p$. Compute $\hat{\phi}$ by Durbin-Levinson.
+
+\textbf{Proposition:} For a causal $A R(p)$ process, we have
+$$
+\begin{gathered}
+\sqrt{n}\left(\hat{\phi}_{h+1 \mid h}-\phi_{h+1 \mid h}\right) \rightarrow_{d} \mathcal{N}\left(0, \sigma^{2} \Gamma_{h}^{-1}\right) \\
+\hat{\sigma}^{2} \rightarrow_{P} \sigma^{2}
+\end{gathered}
+$$
+\textbf{Corollary:} For a causal $A R(p)$ process, for any $h>p$,
+$$
+\sqrt{n} \hat{\alpha}(h) \rightarrow_{d} \mathcal{N}(0,1)
+$$
+is the limiting distribution of the PACF.
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{Maximum Likelihood}
+
+The likelihood function $L\left(\boldsymbol{\beta}, \sigma^{2} ; \mathbf{X}_{1: n}\right)$
+$$
+=(2 \pi)^{-n / 2}\left(\prod_{k=1}^{n} \nu_{k \mid k-1}\right)^{-1/2} \exp \left(-\frac{1}{2} \sum_{k=1}^{n} \frac{U_{k}^{2}}{\nu_{k \mid k-1}}\right)
+$$
+where $U_{k}=X_{k}-\hat{X}_{k \mid k-1}$ which are uncorrelated for $k=1, \ldots, n$ and $\nu_{k \mid k-1}=\operatorname{Var}\left(U_{k}\right)$.
+
+Defining $r_{k}=\nu_{k \mid k-1} / \sigma^{2}$ for $k=1, \ldots, n$ and then taking a logarithm, we have
+$$
+l\left(\boldsymbol{\beta}, \sigma^{2} ; \mathbf{X}_{1: n}\right)=-\frac{n}{2} \log \left(2 \pi \sigma^{2}\right)-\frac{1}{2} \sum_{k=1}^{n} \log r_{k}-\frac{S(\boldsymbol{\beta})}{2 \sigma^{2}}
+$$
+where
+$$
+S(\boldsymbol{\beta})=\sum_{k=1}^{n} \frac{U_{k}^{2}}{r_{k}}
+$$
+is the unconditional sum of squares. 
+
+\textbf{Proposition:} The maximum likelihood estimator for an ARMA(p, $q)$ model is
+
+$$
+\begin{gathered}
+\hat{\boldsymbol{\beta}}_{M L E}=\arg \min _{\boldsymbol{\beta}}\left(\log (S(\boldsymbol{\beta}) / n)+\frac{1}{n} \sum_{k=1}^{n} \log r_{k}\right)\\
+\text{and} \;\; \hat{\sigma}_{M L E}^{2}=\frac{S\left(\hat{\boldsymbol{\beta}}_{M L E}\right)}{n}
+\end{gathered}
+$$
+\textbf{Proposition:} (Asymptotic distribution for MLE). 
+Let $\left(X_{t}\right)$ be a causal and invertible ARMA $(p, q)$ process with $A R$ polynomial $\Phi$ and MA polynomial $\Theta$. The ARMA $(p, q)$ maximum likelihood estimator satisfies
+$$
+\begin{aligned}
+\sqrt{n}\left(\hat{\boldsymbol{\beta}}_{M L E}-\boldsymbol{\beta}\right) & \rightarrow_{d} \mathcal{N}\left(0, \sigma^{2} \Gamma_{p, q}^{-1}\right), \\
+\hat{\sigma}_{M L E}^{2} & \rightarrow \sigma^{2},
+\end{aligned}
+$$
+where
+$$
+\Gamma_{p q}=\left(\begin{array}{cc}
+\Gamma_{\phi \phi} & \Gamma_{\phi \theta} \\
+\Gamma_{\theta \phi} & \Gamma_{\theta \theta}
+\end{array}\right)
+$$
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{Ljung-Box Test Statistic}
+
+The Ljung-Box test statistic is
+$$
+Q=n(n+2) \sum_{k=1}^{h} \frac{\hat{\rho}_{\hat{U}}(k)^{2}}{n-k} \overset{d}{\rightarrow} \chi_{h-p-q}^{2}
+$$
+under $H_0$: model space contains the true model.
+
+\subheading{AIC and AICc}
+$$
+AIC=-2 l\left(\hat{\boldsymbol{\beta}}_{M L E}, \hat{\sigma}_{M L E}^{2} ; \mathbf{X}_{1: n}\right)+2(p+q+1)
+$$
+$$
+AICc=-2 l\left(\hat{\boldsymbol{\beta}}_{M L E}, \hat{\sigma}_{M L E}^{2} ; \mathbf{X}_{1: n}\right)+\frac{2(p+q+1) n}{n-p-q-2}
+$$
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{Non-seasonal ARIMA}
+
+Consider the example. Let $\left(X_{t}\right)$ be a random walk, i.e. $X_{t}=X_{t-1}+Z_{t}$. Then
+$$
+\nabla X_{t}=X_{t}-X_{t-1}=Z_{t}.
+$$
+In other words, the differenced sequence is white noise.
+
+\textbf{Proposition:} If $\left(Y_{t}\right)$ is stationary, then so is the differenced sequence $\left(\nabla Y_{t}\right)$.
+
+\textbf{Definition:} A process $\left(X_{t}\right)$ is said to be $\operatorname{ARIMA}(p, d, q)$ if $\nabla^{d} X_{t}$ is $A R M A(p, q)$. We can write this model as
+$$
+\Phi(B)(1-B)^{d} X_{t}=c+\Theta(B) Z_{t}
+$$
+where $\Phi$ and $\Theta$ are the $A R$ and $M A$ polynomials from before.
+Let $\mu=\mathbb{E}\left\{\nabla^{d} X_{t}\right\}$. Then
+$$
+c=\left(1-\phi_{1} \cdots-\phi_{p}\right) \mu .
+$$
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{Brownian Motion Process}
+
+A continuous time process $(W(t))_{t \geq 0}$ is called standard Brownian motion process if it satisfies
+\begin{enumerate}
+  \item $W(0)=0$;
+  \item $W\left(t_{2}\right)-W\left(t_{1}\right), W\left(t_{3}\right)-W\left(t_{2}\right), \ldots, W\left(t_{n}\right)-W\left(t_{n-1}\right)$ are independent for any $0 \leq t_{1}<t_{2}<\cdots<t_{n}$;
+  \item $W(t+\Delta t)-W(t) \sim \mathcal{N}(0, \Delta t)$ for any $\Delta t>0$.
+\end{enumerate}
+\hline
+\smallskip
+
+\subheading{Unit root tests: Dickey-Fuller (DF)}
+
+Assume an AR(1) generating model, consider
+$$
+\nabla X_{t}=(\phi-1) X_{t-1}+Z_{t}
+$$
+Then, the Dickey-Fuller test statistic is given by
+$$
+n(\hat{\phi}-1)=\frac{n \sum_{t=1}^{n}\left(X_{t}-X_{t-1}\right) X_{t-1}}{\sum_{t=1}^{n} X_{t-1}^{2}}
+$$
+\textbf{Proposition:} Under $H_{0}$, we have
+$$
+n(\hat{\phi}-1) \rightarrow_{d} \frac{\frac{1}{2}\left(W(1)^{2}-1\right)}{\int_{0}^{1} W(t)^{2} d t},
+$$
+where $W(t)$ is a standard Brownian motion process.
+\textbf{Proposition:}
+Now consider a possibly non-stationary $\mathrm{AR}(p)$ process satisfying
+$$
+X_{t}=\sum_{j=1}^{p} \phi_{j} X_{t-j}+Z_{t}
+$$
+To obtain a test statistic, subtract $X_{t-1}$ from both sides to get
+$$
+\nabla X_{t}=\gamma X_{t-1}+\sum_{j=1}^{p-1} \psi_{j} \nabla X_{t-j}+Z_{t}
+$$
+where $\gamma=\sum_{j=1}^{p} \phi_{j}-1$, and $\psi_{j}=-\sum_{i=j+1}^{p} \phi_{i}$ for $j=1, \ldots, p-1$. Since
+$$
+\gamma=\sum_{j=1}^{p} \phi_{j}-1=-\Phi(1)
+$$
+$\Phi$ has a unit root iff $\gamma=0$ and we seek to test the hypothesis
+$$
+H_{0}: \gamma=0 .
+$$
+This time the test statistic is the Wald statistic $\frac{\hat{\gamma}}{s e(\hat{\gamma})}$.
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{Test for stationarity: KPSS}
+
+Assume the generating distribution
+$$
+X_{t}=R_{t}+Y_{t}
+$$
+where $Y_{t}$ is a stationary process and $R_{t}$ is a random walk:
+$$
+R_{t}=R_{t-1}+Z_{t}
+$$
+with $Z_{t}$ 's i.i.d. with variance $\operatorname{Var}\left(Z_{t}\right)=\sigma^{2}$, and $R_{0}$ is a potentially nonzero offset term. We set the null and alternate hypothesis to be
+$$
+H_{0}: \sigma^{2}=0 \quad \text { versus } \quad H_{1}: \sigma^{2}>0
+$$
+The null is equivalent to the generating distribution being stationary. Let $S_{t}=\sum_{j=1}^{t}\left(X_{j}-\bar{X}\right)$ denote the partial sums of the centered process. The KPSS test statistic is
+$$
+\frac{\sum_{t=1}^{n} S_{t}^{2}}{n^{2} \hat{V}}
+$$
+where $\hat{V}$ is an estimate for $V=\operatorname{Var}\left\{S_{n} / \sqrt{n}\right\}$.
+
+\textbf{Proposition:} Suppose $\hat{V}$ is a consistent estimator. Under $H_{0}$, we have
+$$
+\frac{\sum_{t=1}^{n} S_{t}^{2}}{n^{2} \hat{V}} \rightarrow_{d} \int_{0}^{1} B(t)^{2} d t
+$$
+where $B(t):=W(t)-t W(1)$ is a Brownian bridge.
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{Seasonal ARIMA}
+
+The multiplicative seasonal autoregressive integrated moving average model (SARIMA) is given by
+$$
+\Phi^{s}(B^{s}) \Phi(B)(I-B^{s})^{D}(I-B)^{d} X_{t}=c+\Theta^{s}(B^{s}) \Theta(B) Z_{t}
+$$
+where $\Phi$ and $\Theta$ are the autoregressive and moving average polynomials as before,
+$$
+\begin{gathered}
+\Phi^{s}(z)=1-\phi_{1}^{s} z-\cdots-\phi_{P}^{s} z^{P}, \\
+\Theta^{s}(z)=1-\theta_{1}^{s} z-\cdots-\theta_{Q}^{s} z^{Q}
+\end{gathered}
+$$
+are the seasonal autoregressive and seasonal moving average polynomials respectively. A process satisfying this is denoted ARIMA $(p, d, q)(P, D, Q)_{s}$.
+
+\subheading{Transformations}
+
+Variance-stabilizing transformation using log:
+$$
+f_{\lambda}(x)= \begin{cases}\log (x) & \lambda=0 \\ \frac{\operatorname{sign}(x)|x|^{\lambda}-1}{\lambda} & \text { otherwise. }\end{cases}
+$$
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{Forecasting with ARIMA}
+
+For an $\operatorname{ARIMA}(\mathrm{p}, \mathrm{d}, \mathrm{q})$ process $X_{t}$, let $$Y_{t}=(I-B)^{d} X_{t}$$ 
+We may rewrite this as
+$$
+X_{t}=Y_{t}-\sum_{j=1}^{d} {d \choose j} (-1)^{j} X_{t-j}
+$$
+
+$$
+\hat{X}_{t+h \mid t}=\hat{Y}_{t+h \mid t}-\sum_{j=1}^{d}{d \choose j}(-1)^{j} \hat{X}_{t+h-j \mid t}
+$$
+\smallskip
+\hline
+\smallskip
+
+\subheading{Evaluating Point Forecasts}
+
+The forecast error is given by
+$$
+e_{n+h}=X_{n+h}-\hat{X}_{n+h \mid n}
+$$
+Then, to evaluate, (or consider MAE)
+$$
+\mathrm{MSE} =\frac{1}{N-n} \sum_{h=1}^{N-n} e_{n+h}^{2}
+$$
+May normalize forecast errors using total variation
+$$
+\frac{1}{n-1} \sum_{t=2}^{n}\left|X_{t}-X_{t-1}\right| .
+$$
+
+\smallskip
+\hline
+\smallskip
+
+\subheading{Bootstrapping}
+Assume innovations $U_{1}, \ldots, U_{n}$ are i.i.d. We can simulate future trajectories by recursively setting
+$$
+\begin{gathered}
+X_{n}^{*}=X_{n} \\
+X_{n+h}^{*}=X_{n+h-1}^{*}+U_{n+h}^{*}
+\end{gathered}
+$$
+for $h=1,2, \ldots$, where $U_{n+h}^{*}$ is drawn uniformly from $U_{1}, \ldots, U_{n}$. 
+
+\subheading{Evaluating Distributional Forecasts}
+
+If we are interested primarily in the $p$-th quantile of the forecast, instead of using MAE or MSE, we can use the quantile loss:
+$$
+Q_{p, t}= \begin{cases}2(1-p)\left(f_{p, t}-X_{t}\right) & \text { if } X_{t}<f_{p, t} \\ 2 p\left(X_{t}-f_{p, t}\right) & \text { if } X_{t} \geq f_{p, t}\end{cases}
+$$
+where $f_{p, t}$ is the $p$-th quantile of the distributional forecast at time $t$.
+
+\end{multicols*}
+\end{document}
